@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="text-primary">{{ course.name }}</h1>
+        <p class="lead">{{ course.description }}</p>
+
+        <h2 class="mt-4">Lessons</h2>
+        <div class="list-group">
+        {% for lesson in course.lessons.all %}
+            <div class="list-group-item">
+                <h5>{{ lesson.title }}</h5>
+                <p>{{ lesson.content }}</p>
+                <a href="{% url 'exam' lesson.id %}" class="btn btn-outline-primary btn-sm">Take Mock Exam</a>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">No lessons available.</div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

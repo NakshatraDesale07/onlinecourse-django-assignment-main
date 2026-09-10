@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.name }} - Exam Result</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'course_list' %}">OnlineCourse</a>
+        <div class="d-flex align-items-center">
+            {% if user.is_authenticated %}
+                <span class="text-white me-3">Welcome, <strong>{{ user.username }}</strong></span>
+                <a href="/admin/" class="btn btn-sm btn-outline-light me-2">Admin</a>
+            {% endif %}
+            <a href="{% url 'course_list' %}" class="btn btn-sm btn-light">Courses</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4 text-center">
+            <h2 class="fw-bold mb-3">{{ course.name }} - Exam Result</h2>
+
+            {% if passed %}
+                <div class="alert alert-success py-3" role="alert">
+                    <h4 class="alert-heading mb-1">🎉 Congratulations, {{ user.username }}!</h4>
+                    <p class="mb-0">You have passed the exam and completed the course with score <strong>{{ total_score }}/{{ possible_score }}</strong> ({{ grade }}%).</p>
+                </div>
+            {% else %}
+                <div class="alert alert-danger py-3" role="alert">
+                    <h4 class="alert-heading mb-1">Exam Not Passed</h4>
+                    <p class="mb-0">Sorry, {{ user.username }}. You scored <strong>{{ total_score }}/{{ possible_score }}</strong> ({{ grade }}%). A minimum score of 80% is required to pass.</p>
+                </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-center gap-3 my-3">
+                <div class="card bg-body-tertiary px-4 py-2 text-center">
+                    <small class="text-muted">Total Score</small>
+                    <span class="fs-4 fw-bold text-primary">{{ total_score }} / {{ possible_score }}</span>
+                </div>
+                <div class="card bg-body-tertiary px-4 py-2 text-center">
+                    <small class="text-muted">Percentage</small>
+                    <span class="fs-4 fw-bold {% if passed %}text-success{% else %}text-danger{% endif %}">{{ grade }}%</span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="{% url 'exam' course.id %}" class="btn btn-primary px-4">Take Exam Again</a>
+                <a href="{% url 'course_details' course.id %}" class="btn btn-outline-secondary px-4 ms-2">Back to Course</a>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3">Exam Review</h4>
+
+    {% for res in question_results %}
+    <div class="card mb-3 shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0">
+                Question {{ forloop.counter }}: {{ res.question.question_text }}
+            </h5>
+            <div>
+                <span class="badge bg-secondary me-2">{{ res.question.grade }} pts</span>
+                {% if res.is_correct %}
+                    <span class="badge bg-success">Correct</span>
+                {% else %}
+                    <span class="badge bg-danger">Incorrect</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="list-group list-group-flush">
+                {% for choice in res.choices %}
+                <div class="list-group-item d-flex justify-content-between align-items-center
+                    {% if choice in choices and choice.is_correct %}
+                        list-group-item-success
+                    {% elif choice in choices and not choice.is_correct %}
+                        list-group-item-danger
+                    {% elif choice.is_correct %}
+                        list-group-item-warning
+                    {% endif %}
+                ">
+                    <div>
+                        <input class="form-check-input me-2" type="checkbox" disabled {% if choice in choices %}checked{% endif %}>
+                        <span>{{ choice.choice_text }}</span>
+                    </div>
+                    <div>
+                        {% if choice in choices and choice.is_correct %}
+                            <span class="badge bg-success">Your Answer (Correct)</span>
+                        {% elif choice in choices and not choice.is_correct %}
+                            <span class="badge bg-danger">Your Answer (Incorrect)</span>
+                        {% elif choice.is_correct %}
+                            <span class="badge bg-warning text-dark">Correct Answer</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>
